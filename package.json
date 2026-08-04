@@ -1,0 +1,62 @@
+{
+  "name": "vite-plus-commitlint",
+  "version": "1.0.0",
+  "description": "Unified Commitlint plugin and CLI for Vite+",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./rules": {
+      "import": "./dist/rules/index.js",
+      "types": "./dist/rules/index.d.ts"
+    },
+    "./presets/conventional": {
+      "import": "./dist/presets/conventional.js",
+      "types": "./dist/presets/conventional.d.ts"
+    }
+  },
+  "bin": {
+    "commitlint": "./dist/cli.js",
+    "vite-plus-commitlint": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown src/index.ts src/cli.ts src/rules/index.ts src/presets/conventional.ts --dts",
+    "test": "vitest run",
+    "check": "oxlint && oxfmt --check"
+  },
+  "dependencies": {
+    "conventional-commits-parser": "^7.0.0",
+    "picocolors": "^1.1.1",
+    "tinyexec": "^1.0.0",
+    "yargs": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/yargs": "^17.0.33",
+    "tsdown": "^0.15.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vite-plus": "^0.1.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "keywords": [
+    "vite",
+    "vite-plus",
+    "commitlint",
+    "conventional-commits",
+    "git-hooks"
+  ],
+  "license": "MIT",
+  "packageManager": "pnpm@11.20.0"
+}
