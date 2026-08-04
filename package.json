@@ -2,6 +2,21 @@
   "name": "vite-plus-commitlint",
   "version": "1.0.0",
   "description": "Unified Commitlint plugin and CLI for Vite+",
+  "keywords": [
+    "commitlint",
+    "conventional-commits",
+    "git-hooks",
+    "vite",
+    "vite-plus"
+  ],
+  "license": "MIT",
+  "bin": {
+    "commitlint": "./dist/cli.js",
+    "vite-plus-commitlint": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -20,13 +35,6 @@
       "types": "./dist/presets/conventional.d.ts"
     }
   },
-  "bin": {
-    "commitlint": "./dist/cli.js",
-    "vite-plus-commitlint": "./dist/cli.js"
-  },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "tsdown src/index.ts src/cli.ts src/rules/index.ts src/presets/conventional.ts --dts",
     "test": "vitest run",
@@ -50,13 +58,5 @@
   "engines": {
     "node": ">=22.12.0"
   },
-  "keywords": [
-    "vite",
-    "vite-plus",
-    "commitlint",
-    "conventional-commits",
-    "git-hooks"
-  ],
-  "license": "MIT",
   "packageManager": "pnpm@11.20.0"
 }

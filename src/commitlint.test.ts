@@ -1,17 +1,17 @@
-import { describe, it, expect } from 'vitest';
-import { lintCommit, parseCommit } from './linter.js';
-import { conventionalPreset } from './presets/conventional.js';
-import { rules } from './rules/index.js';
+import { describe, it, expect } from "vitest";
+import { lintCommit, parseCommit } from "./linter.js";
+import { conventionalPreset } from "./presets/conventional.js";
+import { rules } from "./rules/index.js";
 
-describe('Conventional Commit Ruleset', () => {
-  it('passes valid conventional commit messages', async () => {
+describe("Conventional Commit Ruleset", () => {
+  it("passes valid conventional commit messages", async () => {
     const validMessages = [
-      'feat: add new button component',
-      'fix(ui): resolve alignment issue on mobile',
-      'docs: update README with installation steps',
-      'refactor(core): simplify event handler logic',
-      'test: add unit test for commit linter',
-      'chore: release v1.0.0',
+      "feat: add new button component",
+      "fix(ui): resolve alignment issue on mobile",
+      "docs: update README with installation steps",
+      "refactor(core): simplify event handler logic",
+      "test: add unit test for commit linter",
+      "chore: release v1.0.0",
     ];
 
     for (const msg of validMessages) {
@@ -21,13 +21,13 @@ describe('Conventional Commit Ruleset', () => {
     }
   });
 
-  it('fails invalid conventional commit messages', async () => {
+  it("fails invalid conventional commit messages", async () => {
     const invalidMessages = [
-      { msg: 'ADD NEW FEATURE', expectedRule: 'type-empty' },
-      { msg: 'feat: Add New Feature', expectedRule: 'subject-case' },
-      { msg: 'feat: add new feature.', expectedRule: 'subject-full-stop' },
-      { msg: 'INVALID_TYPE: add feature', expectedRule: 'type-enum' },
-      { msg: 'FEAT: add feature', expectedRule: 'type-case' },
+      { msg: "ADD NEW FEATURE", expectedRule: "type-empty" },
+      { msg: "feat: Add New Feature", expectedRule: "subject-case" },
+      { msg: "feat: add new feature.", expectedRule: "subject-full-stop" },
+      { msg: "INVALID_TYPE: add feature", expectedRule: "type-enum" },
+      { msg: "FEAT: add feature", expectedRule: "type-case" },
     ];
 
     for (const { msg, expectedRule } of invalidMessages) {
@@ -39,22 +39,22 @@ describe('Conventional Commit Ruleset', () => {
   });
 });
 
-describe('Commit Parser', () => {
-  it('correctly parses conventional commit structure', () => {
-    const parsed = parseCommit('feat(auth): add OAuth2 login flow');
-    expect(parsed.type).toBe('feat');
-    expect(parsed.scope).toBe('auth');
-    expect(parsed.subject).toBe('add OAuth2 login flow');
-    expect(parsed.header).toBe('feat(auth): add OAuth2 login flow');
+describe("Commit Parser", () => {
+  it("correctly parses conventional commit structure", () => {
+    const parsed = parseCommit("feat(auth): add OAuth2 login flow");
+    expect(parsed.type).toBe("feat");
+    expect(parsed.scope).toBe("auth");
+    expect(parsed.subject).toBe("add OAuth2 login flow");
+    expect(parsed.header).toBe("feat(auth): add OAuth2 login flow");
   });
 });
 
-describe('Rules Registry', () => {
-  it('contains all core rules', () => {
-    expect(rules['type-enum']).toBeDefined();
-    expect(rules['header-max-length']).toBeDefined();
-    expect(rules['subject-empty']).toBeDefined();
-    expect(rules['subject-case']).toBeDefined();
-    expect(rules['subject-full-stop']).toBeDefined();
+describe("Rules Registry", () => {
+  it("contains all core rules", () => {
+    expect(rules["type-enum"]).toBeDefined();
+    expect(rules["header-max-length"]).toBeDefined();
+    expect(rules["subject-empty"]).toBeDefined();
+    expect(rules["subject-case"]).toBeDefined();
+    expect(rules["subject-full-stop"]).toBeDefined();
   });
 });

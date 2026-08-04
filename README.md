@@ -34,8 +34,8 @@ vp add -D vite-plus-commitlint
 ### 1. Register Plugin in `vite.config.ts`
 
 ```ts
-import { defineConfig } from 'vite-plus';
-import { commitlint } from 'vite-plus-commitlint';
+import { defineConfig } from "vite-plus";
+import { commitlint } from "vite-plus-commitlint";
 
 export default defineConfig({
   plugins: [
@@ -43,12 +43,12 @@ export default defineConfig({
       // Zero-config defaults to conventional commits rules!
       // Optional overrides:
       rules: {
-        'header-max-length': [2, 'always', 100],
+        "header-max-length": [2, "always", 100],
       },
     }),
   ],
   staged: {
-    'COMMIT_EDITMSG': 'vp exec vite-plus-commitlint --edit',
+    COMMIT_EDITMSG: "vp exec vite-plus-commitlint --edit",
   },
 });
 ```
@@ -93,15 +93,15 @@ vp exec vite-plus-commitlint --edit --strict
 ## Programmatic API
 
 ```ts
-import { lintCommit, parseCommit, conventionalPreset, rules } from 'vite-plus-commitlint';
+import { lintCommit, parseCommit, conventionalPreset, rules } from "vite-plus-commitlint";
 
 // Parse a commit message
-const parsed = parseCommit('feat(ui): add new button component');
+const parsed = parseCommit("feat(ui): add new button component");
 console.log(parsed.type); // 'feat'
 console.log(parsed.scope); // 'ui'
 
 // Lint a commit message against rules
-const report = await lintCommit('fix: resolve alignment', conventionalPreset.rules);
+const report = await lintCommit("fix: resolve alignment", conventionalPreset.rules);
 console.log(report.valid); // true
 ```
 

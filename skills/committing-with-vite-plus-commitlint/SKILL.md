@@ -10,6 +10,7 @@ description: Use when writing a git commit message in a repository that uses vit
 ## 1. Detect whether the repository uses `vite-plus-commitlint`
 
 Any of these indicates `vite-plus-commitlint` is active:
+
 - A `commitlint()` plugin or `commitlint` block inside `vite.config.ts`
 - `vite-plus-commitlint` in `package.json` dependencies
 - `.vite-hooks/commit-msg` containing `vp exec vite-plus-commitlint` or `vp staged`
@@ -21,11 +22,13 @@ vp exec vite-plus-commitlint --print-config json
 ```
 
 Look at the `rules` object. Each rule is `[severity, applicability, value]`:
+
 - **severity** — `0` = disabled, `1` = warning, `2` = error (only errors block commits)
 - **applicability** — `"always"` = must hold, `"never"` = must not hold
 - **value** — the rule's parameter
 
 Key rules:
+
 - `type-enum`: Allowed commit types (e.g. `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `ci`)
 - `scope-enum`: Allowed scopes
 - `subject-case`: Case restriction for subject
@@ -37,6 +40,7 @@ Key rules:
 Format: `type(scope): subject`
 
 Example:
+
 ```
 feat(parser): add support for inline issue references
 

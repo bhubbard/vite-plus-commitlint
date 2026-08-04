@@ -4,17 +4,17 @@ export enum RuleConfigSeverity {
   Error = 2,
 }
 
-export type RuleConfigCondition = 'always' | 'never';
+export type RuleConfigCondition = "always" | "never";
 
 export type TargetCaseType =
-  | 'lower-case'
-  | 'upper-case'
-  | 'camel-case'
-  | 'kebab-case'
-  | 'pascal-case'
-  | 'sentence-case'
-  | 'start-case'
-  | 'snake-case';
+  | "lower-case"
+  | "upper-case"
+  | "camel-case"
+  | "kebab-case"
+  | "pascal-case"
+  | "sentence-case"
+  | "start-case"
+  | "snake-case";
 
 export type RuleOutcome = [boolean, string?];
 
@@ -27,7 +27,13 @@ export interface ParsedCommit {
   body: string | null;
   footer: string | null;
   notes: Array<{ name: string; text: string }>;
-  references: Array<{ action?: string; owner?: string; repository?: string; issue: string; raw: string }>;
+  references: Array<{
+    action?: string;
+    owner?: string;
+    repository?: string;
+    issue: string;
+    raw: string;
+  }>;
   revert?: { header?: string; hash?: string } | null;
   mentions?: string[];
 }
@@ -35,7 +41,7 @@ export interface ParsedCommit {
 export type Rule<Value = any> = (
   parsed: ParsedCommit,
   condition?: RuleConfigCondition,
-  value?: Value
+  value?: Value,
 ) => RuleOutcome | Promise<RuleOutcome>;
 
 export type RuleConfig<Value = any> =
@@ -115,7 +121,7 @@ export interface CliFlags {
   color?: boolean;
   config?: string;
   defaultConfig?: boolean;
-  printConfig?: 'text' | 'json';
+  printConfig?: "text" | "json";
   cwd?: string;
   edit?: string | boolean;
   env?: string;

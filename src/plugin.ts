@@ -1,16 +1,16 @@
-import type { Plugin } from 'vite';
-import type { CommitlintPluginOptions, QualifiedConfig, LintReport } from './types.js';
-import { resolveConfig } from './loader.js';
-import { lintCommit } from './linter.ts';
-import { readCommitMessages } from './reader.js';
-import { formatReport } from './formatter.js';
+import type { Plugin } from "vite";
+import type { CommitlintPluginOptions, QualifiedConfig, LintReport } from "./types.js";
+import { resolveConfig } from "./loader.js";
+import { lintCommit } from "./linter.ts";
+import { readCommitMessages } from "./reader.js";
+import { formatReport } from "./formatter.js";
 
 export function commitlint(options: CommitlintPluginOptions = {}): Plugin {
   let resolvedConfig: QualifiedConfig;
   let rootCwd: string = process.cwd();
 
   return {
-    name: 'vite-plus-commitlint',
+    name: "vite-plus-commitlint",
 
     async configResolved(config) {
       rootCwd = config.root || process.cwd();
@@ -27,19 +27,19 @@ export function commitlint(options: CommitlintPluginOptions = {}): Plugin {
 
     configureServer(server) {
       // Dev server middleware exposing endpoint /__commitlint/validate
-      server.middlewares.use('/__commitlint/validate', async (req, res) => {
-        if (req.method === 'POST') {
-          let body = '';
-          req.on('data', (chunk) => {
+      server.middlewares.use("/__commitlint/validate", async (req, res) => {
+        if (req.method === "POST") {
+          let body = "";
+          req.on("data", (chunk) => {
             body += chunk;
           });
-          req.on('end', async () => {
+          req.on("end", async () => {
             try {
               const { message } = JSON.parse(body);
               const result = await lintCommit(message, resolvedConfig.rules, {
                 parserOpts: resolvedConfig.parserPreset?.parserOpts,
               });
-              res.setHeader('Content-Type', 'application/json');
+              res.setHeader("Content-Type", "application/json");
               res.end(JSON.stringify(result));
             } catch (err: any) {
               res.statusCode = 400;
@@ -48,7 +48,7 @@ export function commitlint(options: CommitlintPluginOptions = {}): Plugin {
           });
         } else {
           res.statusCode = 405;
-          res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+          res.end(JSON.stringify({ error: "Method Not Allowed" }));
         }
       });
     },
@@ -67,8 +67,8 @@ export function commitlint(options: CommitlintPluginOptions = {}): Plugin {
           messages.map((msg) =>
             lintCommit(msg, resolvedConfig.rules, {
               parserOpts: resolvedConfig.parserPreset?.parserOpts,
-            })
-          )
+            }),
+          ),
         );
 
         const report: LintReport = results.reduce<LintReport>(
@@ -79,7 +79,7 @@ export function commitlint(options: CommitlintPluginOptions = {}): Plugin {
             info.results.push(result);
             return info;
           },
-          { valid: true, errorCount: 0, warningCount: 0, results: [] }
+          { valid: true, errorCount: 0, warningCount: 0, results: [] },
         );
 
         if (!report.valid) {

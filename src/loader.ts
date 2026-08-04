@@ -1,12 +1,12 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import type { QualifiedConfig, UserConfig } from './types.js';
-import conventionalPreset from './presets/conventional.js';
+import fs from "node:fs";
+import path from "node:path";
+import type { QualifiedConfig, UserConfig } from "./types.js";
+import conventionalPreset from "./presets/conventional.js";
 
 export async function resolveConfig(
   cwd: string = process.cwd(),
   configFile?: string,
-  userSeed?: UserConfig
+  userSeed?: UserConfig,
 ): Promise<QualifiedConfig> {
   let loadedConfig: UserConfig = { ...conventionalPreset };
 
@@ -25,18 +25,18 @@ export async function resolveConfig(
   } else {
     // 2. Check for legacy commitlint files in cwd
     const candidates = [
-      'commitlint.config.js',
-      'commitlint.config.mjs',
-      'commitlint.config.ts',
-      '.commitlintrc.json',
-      '.commitlintrc.js',
+      "commitlint.config.js",
+      "commitlint.config.mjs",
+      "commitlint.config.ts",
+      ".commitlintrc.json",
+      ".commitlintrc.js",
     ];
     for (const candidate of candidates) {
       const fullPath = path.join(cwd, candidate);
       if (fs.existsSync(fullPath)) {
         try {
-          if (candidate.endsWith('.json')) {
-            const json = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+          if (candidate.endsWith(".json")) {
+            const json = JSON.parse(fs.readFileSync(fullPath, "utf8"));
             loadedConfig = mergeConfigs(loadedConfig, json);
           } else {
             const module = await import(fullPath);
@@ -58,11 +58,12 @@ export async function resolveConfig(
 
   return {
     extends: loadedConfig.extends || [],
-    parserPreset: typeof loadedConfig.parserPreset === 'object' ? loadedConfig.parserPreset : undefined,
+    parserPreset:
+      typeof loadedConfig.parserPreset === "object" ? loadedConfig.parserPreset : undefined,
     rules: loadedConfig.rules || conventionalPreset.rules!,
     ignores: loadedConfig.ignores,
     defaultIgnores: loadedConfig.defaultIgnores ?? true,
-    helpUrl: loadedConfig.helpUrl || 'https://commitlint.js.org/',
+    helpUrl: loadedConfig.helpUrl || "https://commitlint.js.org/",
   };
 }
 
@@ -71,8 +72,8 @@ export function mergeConfigs(base: UserConfig, override: UserConfig): UserConfig
     ...base,
     ...override,
     rules: {
-      ...(base.rules || {}),
-      ...(override.rules || {}),
+      ...base.rules,
+      ...override.rules,
     },
     extends: [...(base.extends || []), ...(override.extends || [])],
   };
