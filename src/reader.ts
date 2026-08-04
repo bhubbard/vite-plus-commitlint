@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { x } from "tinyexec";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 export interface ReadOptions {
   cwd?: string;
@@ -48,12 +51,11 @@ export async function readCommitMessages(options: ReadOptions = {}): Promise<str
       from = "HEAD~1";
     } else if (options.fromLastTag && !from) {
       try {
-        const tagResult = await x("git", ["describe", "--tags", "--abbrev=0"], {
-          nodeOptions: { cwd },
+        const { stdout } = await execFileAsync("git", ["describe", "--tags", "--abbrev=0"], {
+          cwd,
+          encoding: "utf-8",
         });
-        if (tagResult.exitCode === 0) {
-          from = tagResult.stdout.trim();
-        }
+        from = stdout.trim();
       } catch {
         from = "HEAD~1";
       }
@@ -73,13 +75,11 @@ export async function readCommitMessages(options: ReadOptions = {}): Promise<str
     }
 
     try {
-      const result = await x("git", args, { nodeOptions: { cwd } });
-      if (result.exitCode === 0) {
-        return result.stdout
-          .split("\x1e")
-          .map((msg) => msg.trim())
-          .filter(Boolean);
-      }
+      const { stdout } = await execFileAsync("git", args, { cwd, encoding: "utf-8" });
+      return stdout
+        .split("\x1e")
+        .map((msg) => msg.trim())
+        .filter(Boolean);
     } catch {
       // Fallback
     }

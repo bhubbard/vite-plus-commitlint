@@ -1,6 +1,5 @@
-import { CommitParser } from "conventional-commits-parser";
+import { parseCommit } from "./parser.js";
 import type {
-  ParsedCommit,
   RulesConfig,
   RuleConfigSeverity,
   RuleConfigCondition,
@@ -10,28 +9,7 @@ import type {
 } from "./types.js";
 import rulesRegistry from "./rules/index.js";
 
-export function parseCommit(message: string, options?: ParserOptions): ParsedCommit {
-  const parserOpts = {
-    headerPattern: /^(\w*)(?:\((.*)\))?!?: (.*)$/,
-    headerCorrespondence: ["type", "scope", "subject"],
-    ...options,
-  };
-  const parser = new CommitParser(parserOpts as any);
-  const parsed = parser.parse(message) as any;
-  return {
-    raw: message,
-    header: parsed.header || message.split(/\r?\n/)[0] || null,
-    type: parsed.type || null,
-    scope: parsed.scope || null,
-    subject: parsed.subject || null,
-    body: parsed.body || null,
-    footer: parsed.footer || null,
-    notes: parsed.notes || [],
-    references: parsed.references || [],
-    revert: parsed.revert || null,
-    mentions: parsed.mentions || [],
-  };
-}
+export { parseCommit };
 
 export async function lintCommit(
   message: string,

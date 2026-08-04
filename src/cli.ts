@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import process from "node:process";
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
+import { parseArgs } from "node:util";
 import { resolveConfig } from "./loader.js";
 import { readCommitMessages, readStdin } from "./reader.js";
 import { lintCommit } from "./linter.js";
@@ -9,112 +8,80 @@ import { formatReport } from "./formatter.js";
 import type { LintReport } from "./types.js";
 
 async function main() {
-  const argv = await yargs(hideBin(process.argv))
-    .options({
-      color: {
-        alias: "c",
-        default: true,
-        description: "toggle colored output",
-        type: "boolean",
-      },
-      config: {
-        alias: "g",
-        description: "path to the config file",
-        type: "string",
-      },
-      "print-config": {
-        choices: ["", "text", "json"],
-        description: "print resolved config",
-        type: "string",
-      },
-      cwd: {
-        alias: "d",
-        default: process.cwd(),
-        description: "directory to execute in",
-        type: "string",
-      },
-      edit: {
-        alias: "e",
-        description: "read commit message from file or .git/COMMIT_EDITMSG",
-        type: "string",
-      },
-      env: {
-        alias: "E",
-        description: "check message in path given by environment variable",
-        type: "string",
-      },
-      from: {
-        alias: "f",
-        description: "lower end of commit range to lint",
-        type: "string",
-      },
-      "from-last-tag": {
-        description: "use last tag as lower end of commit range",
-        type: "boolean",
-      },
-      gitLogArgs: {
-        description: "additional git log arguments",
-        type: "string",
-      },
-      last: {
-        alias: "l",
-        description: "analyze last commit",
-        type: "boolean",
-      },
-      quiet: {
-        alias: "q",
-        default: false,
-        description: "toggle console output",
-        type: "boolean",
-      },
-      to: {
-        alias: "t",
-        description: "upper end of commit range to lint",
-        type: "string",
-      },
-      verbose: {
-        alias: "V",
-        type: "boolean",
-        description: "enable verbose output",
-      },
-      strict: {
-        alias: "s",
-        type: "boolean",
-        description: "enable strict mode (exit code 2 for warnings, 3 for errors)",
-      },
-    })
-    .help("help")
-    .alias("h", "help")
-    .parse();
+  const { values } = parseArgs({
+    args: process.argv.slice(2),
+    options: {
+      color: { type: "boolean", short: "c", default: true },
+      config: { type: "string", short: "g" },
+      "print-config": { type: "string" },
+      cwd: { type: "string", short: "d", default: process.cwd() },
+      edit: { type: "string", short: "e" },
+      env: { type: "string", short: "E" },
+      from: { type: "string", short: "f" },
+      "from-last-tag": { type: "boolean" },
+      gitLogArgs: { type: "string" },
+      last: { type: "boolean", short: "l" },
+      quiet: { type: "boolean", short: "q", default: false },
+      to: { type: "string", short: "t" },
+      verbose: { type: "boolean", short: "V" },
+      strict: { type: "boolean", short: "s" },
+      help: { type: "boolean", short: "h" },
+    },
+    strict: false,
+    tokens: false,
+  });
 
-  const cwd = (argv.cwd as string) || process.cwd();
-  const config = await resolveConfig(cwd, argv.config as string | undefined);
+  if (values.help) {
+    console.log(`
+commitlint - Lint commit messages
 
-  if (typeof argv["print-config"] === "string") {
-    if (argv["print-config"] === "json") {
+Options:
+  -c, --color           toggle colored output [default: true]
+  -g, --config          path to the config file
+      --print-config    print resolved config (json|text)
+  -d, --cwd             directory to execute in
+  -e, --edit            read commit message from file or .git/COMMIT_EDITMSG
+  -E, --env             check message in path given by environment variable
+  -f, --from            lower end of commit range to lint
+      --from-last-tag   use last tag as lower end of commit range
+      --gitLogArgs      additional git log arguments
+  -l, --last            analyze last commit
+  -q, --quiet           toggle console output [default: false]
+  -t, --to              upper end of commit range to lint
+  -V, --verbose         enable verbose output
+  -s, --strict          enable strict mode
+  -h, --help            show help
+`);
+    process.exit(0);
+  }
+
+  const cwd = values.cwd || process.cwd();
+  const config = await resolveConfig(cwd, values.config);
+
+  if (typeof values["print-config"] === "string") {
+    if (values["print-config"] === "json") {
       console.log(JSON.stringify(config, null, 2));
     } else {
-      console.dir(config, { depth: null, colors: argv.color !== false });
+      console.dir(config, { depth: null, colors: values.color !== false });
     }
     process.exit(0);
   }
 
   let messages: string[] = [];
 
-  // If input via stdin
   const stdinMsg = await readStdin();
   if (stdinMsg) {
     messages = [stdinMsg];
   } else {
     messages = await readCommitMessages({
       cwd,
-      edit: argv.edit as string | boolean | undefined,
-      env: argv.env as string | undefined,
-      from: argv.from as string | undefined,
-      to: argv.to as string | undefined,
-      last: argv.last as boolean | undefined,
-      fromLastTag: argv["from-last-tag"] as boolean | undefined,
-      gitLogArgs: argv.gitLogArgs as string | undefined,
+      edit: values.edit,
+      env: values.env,
+      from: values.from,
+      to: values.to,
+      last: values.last,
+      fromLastTag: values["from-last-tag"],
+      gitLogArgs: values.gitLogArgs,
     });
   }
 
@@ -143,16 +110,16 @@ async function main() {
   );
 
   const output = formatReport(report, {
-    color: argv.color as boolean,
-    verbose: argv.verbose as boolean,
+    color: values.color,
+    verbose: values.verbose,
     helpUrl: config.helpUrl,
   });
 
-  if (!argv.quiet && output) {
+  if (!values.quiet && output) {
     console.log(output);
   }
 
-  if (argv.strict) {
+  if (values.strict) {
     if (report.errorCount > 0) process.exit(3);
     if (report.warningCount > 0) process.exit(2);
   }

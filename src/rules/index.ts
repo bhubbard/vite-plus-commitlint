@@ -7,7 +7,7 @@ import {
   maxLineLength,
   notEmpty,
 } from "../ensure.js";
-import { xSync } from "tinyexec";
+import { execFileSync } from "node:child_process";
 
 export const bodyCase: Rule<string | string[]> = (parsed, when = "always", value = []) => {
   if (!parsed.body) return [true];
@@ -254,10 +254,11 @@ export const subjectExclamationMark: Rule = (parsed, when = "always") => {
 
 export const trailerExists: Rule<string> = (parsed, when = "always", value = "") => {
   try {
-    const res = xSync("git", ["interpret-trailers", "--parse"], {
-      nodeOptions: { input: parsed.raw || "" },
+    const stdout = execFileSync("git", ["interpret-trailers", "--parse"], {
+      input: parsed.raw || "",
+      encoding: "utf-8",
     });
-    const count = (res.stdout || "").split(/\r?\n/).filter((ln) => ln.startsWith(value)).length;
+    const count = (stdout || "").split(/\r?\n/).filter((ln) => ln.startsWith(value)).length;
     const hasTrailer = count > 0;
     const negated = when === "never";
     return [

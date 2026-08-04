@@ -1,4 +1,3 @@
-import pc from "picocolors";
 import type { LintReport } from "./types.js";
 
 export interface FormatOptions {
@@ -7,13 +6,23 @@ export interface FormatOptions {
   helpUrl?: string;
 }
 
+const color = {
+  red: (s: string) => `\x1b[31m${s}\x1b[39m`,
+  yellow: (s: string) => `\x1b[33m${s}\x1b[39m`,
+  green: (s: string) => `\x1b[32m${s}\x1b[39m`,
+  bold: (s: string) => `\x1b[1m${s}\x1b[22m`,
+  dim: (s: string) => `\x1b[2m${s}\x1b[22m`,
+};
+
+const identity = (s: string) => s;
+
 export function formatReport(report: LintReport, options: FormatOptions = {}): string {
   const useColor = options.color !== false;
-  const red = useColor ? pc.red : (s: string) => s;
-  const yellow = useColor ? pc.yellow : (s: string) => s;
-  const green = useColor ? pc.green : (s: string) => s;
-  const bold = useColor ? pc.bold : (s: string) => s;
-  const dim = useColor ? pc.dim : (s: string) => s;
+  const red = useColor ? color.red : identity;
+  const yellow = useColor ? color.yellow : identity;
+  const green = useColor ? color.green : identity;
+  const bold = useColor ? color.bold : identity;
+  const dim = useColor ? color.dim : identity;
 
   const lines: string[] = [];
 

@@ -1,6 +1,6 @@
 {
   "name": "vite-plus-commitlint",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Unified Commitlint plugin and CLI for Vite+",
   "keywords": [
     "commitlint",
@@ -40,15 +40,8 @@
     "test": "vitest run",
     "check": "oxlint && oxfmt --check"
   },
-  "dependencies": {
-    "conventional-commits-parser": "^7.0.0",
-    "picocolors": "^1.1.1",
-    "tinyexec": "^1.0.0",
-    "yargs": "^18.0.0"
-  },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "@types/yargs": "^17.0.33",
     "tsdown": "^0.15.0",
     "typescript": "^5.7.0",
     "vite": "^6.0.0",
