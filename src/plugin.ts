@@ -33,7 +33,20 @@ export function commitlint(options: CommitlintPluginOptions = {}): Plugin {
 
     async buildStart() {
       if (options.autoLintOnBuild) {
-        const result = lintCommit("HEAD");
+        const { spawnSync } = await import("node:child_process");
+        const { getBinaryPath } = await import("./rust.js");
+        const bin = getBinaryPath();
+        const res = spawnSync(bin, ["--last", "--json"], { encoding: "utf-8" });
+        let result: { valid: boolean } = { valid: true };
+        if (res.stdout) {
+          try {
+            result = JSON.parse(res.stdout.trim());
+          } catch {
+            // Fallback
+          }
+        } else if (res.status !== 0) {
+          result = { valid: false };
+        }
         if (!result.valid && options.failOnError !== false) {
           this.error("[vite-plus-commitlint] Commit validation failed");
         }

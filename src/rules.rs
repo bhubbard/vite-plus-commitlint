@@ -1,6 +1,5 @@
 use crate::parser::ParsedCommit;
 use serde_json::Value;
-use std::process::Command;
 
 pub fn ensure_case(target: &str, case: &str) -> bool {
     match case {
@@ -27,7 +26,8 @@ pub fn ensure_case(target: &str, case: &str) -> bool {
         "sentence-case" | "sentencecase" => {
             let mut chars = target.chars();
             if let Some(first) = chars.next() {
-                first.is_uppercase() && target[1..] == target[1..].to_lowercase()
+                let rest: String = chars.collect();
+                first.is_uppercase() && rest == rest.to_lowercase()
             } else {
                 true
             }
@@ -368,14 +368,9 @@ pub fn evaluate_rule(
         }
         "trailer-exists" => {
             let val = value.as_str().unwrap_or("");
-            let output = Command::new("git")
-                .args(["interpret-trailers", "--parse"])
-                .output();
-            let has = if let Ok(out) = output {
-                String::from_utf8_lossy(&out.stdout).lines().any(|l| l.starts_with(val))
-            } else {
-                false
-            };
+            let has = parsed.footer.as_ref().map_or(false, |f| {
+                f.lines().any(|l| l.to_lowercase().starts_with(&val.to_lowercase()))
+            }) || parsed.raw.lines().any(|l| l.to_lowercase().starts_with(&val.to_lowercase()));
             let passes = if always { has } else { !has };
             (passes, format!("message must {}have \"{}\" trailer", if always { "" } else { "not " }, val))
         }

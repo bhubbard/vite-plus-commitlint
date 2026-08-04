@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct LoadedConfig {
     pub rules: HashMap<String, Value>,
     pub help_url: Option<String>,

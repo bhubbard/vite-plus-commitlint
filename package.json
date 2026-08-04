@@ -30,9 +30,9 @@
   },
   "scripts": {
     "build:cargo": "cargo build --release",
-    "build": "cargo build --release && tsdown src/index.ts src/cli.ts --dts",
+    "build": "cargo build --release && tsdown src/index.ts src/cli.ts --dts && mkdir -p dist/bin && cp target/release/commitlint-rs* dist/bin/",
     "test": "vitest run",
-    "check": "oxlint && oxfmt --check"
+    "check": "vp lint && vp fmt --check"
   },
   "devDependencies": {
     "@napi-rs/cli": "^3.0.0",

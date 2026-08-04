@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { lintCommit } from "./rust.js";
+import { lintCommit, parseCommit, conventionalPreset, rules, commitlint } from "./index.js";
+import { runCommitlintCli } from "./rust.js";
 
-describe("Rust-Backed Commit Linter", () => {
+describe("Rust-Backed Commit Linter Core", () => {
   it("passes valid conventional commit messages", () => {
     const validMessages = [
       "feat: add new button component",
@@ -10,6 +11,8 @@ describe("Rust-Backed Commit Linter", () => {
       "refactor(core): simplify event handler logic",
       "test: add unit test for commit linter",
       "chore: release v1.0.0",
+      "feat(deps-dev): upgrade vitest",
+      "feat(i18n): support UTF-8 characters 🚀",
     ];
 
     for (const msg of validMessages) {
@@ -34,5 +37,76 @@ describe("Rust-Backed Commit Linter", () => {
       const hasError = outcome.errors.some((err) => err.name === expectedRule);
       expect(hasError, `Expected rule ${expectedRule} to fail for "${msg}"`).toBe(true);
     }
+  });
+});
+
+describe("Programmatic API Exports", () => {
+  it("exports parseCommit correctly", () => {
+    const parsed = parseCommit("feat(ui)!: add button\n\nBody message");
+    expect(parsed.type).toBe("feat");
+    expect(parsed.scope).toBe("ui");
+    expect(parsed.subject).toBe("add button");
+  });
+
+  it("exports conventionalPreset and rules", () => {
+    expect(conventionalPreset).toBeDefined();
+    expect(conventionalPreset.rules).toBeDefined();
+    expect(rules["type-enum"]).toBeDefined();
+  });
+});
+
+describe("Vite Plugin & Middleware", () => {
+  it("initializes plugin with default options", () => {
+    const plugin = commitlint();
+    expect(plugin.name).toBe("vite-plus-commitlint");
+    expect(plugin.configureServer).toBeDefined();
+  });
+
+  it("handles middleware validation request", () => {
+    const plugin = commitlint();
+    let handler: any;
+    const fakeServer: any = {
+      middlewares: {
+        use: (path: string, fn: any) => {
+          if (path === "/__commitlint/validate") {
+            handler = fn;
+          }
+        },
+      },
+    };
+
+    plugin.configureServer!(fakeServer);
+    expect(handler).toBeDefined();
+
+    let _statusCode = 200;
+    let responseData = "";
+    let headers: Record<string, string> = {};
+
+    const fakeReq: any = {
+      method: "POST",
+      on: (event: string, cb: any) => {
+        if (event === "data") cb(JSON.stringify({ message: "feat: valid message" }));
+        if (event === "end") cb();
+      },
+    };
+    const fakeRes: any = {
+      setHeader: (k: string, v: string) => {
+        headers[k] = v;
+      },
+      end: (data: string) => {
+        responseData = data;
+      },
+    };
+
+    handler(fakeReq, fakeRes);
+    const parsed = JSON.parse(responseData);
+    expect(parsed.valid).toBe(true);
+  });
+});
+
+describe("CLI Integration", () => {
+  it("runs CLI with --print-config json without crashing", () => {
+    const exitCode = runCommitlintCli(["--print-config", "json"]);
+    expect(exitCode).toBe(0);
   });
 });

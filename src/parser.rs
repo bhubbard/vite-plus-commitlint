@@ -52,7 +52,7 @@ pub fn parse_commit(message: &str) -> ParsedCommit {
         });
     }
 
-    let header_re = Regex::new(r#"^(\w*)(?:\((.*)\))?!?: (.*)$"#).unwrap();
+    let header_re = Regex::new(r#"^([a-zA-Z0-9_-]+)(?:\((.*)\))?(!)?:\s*(.*)$"#).unwrap();
     let mut type_ = None;
     let mut scope = None;
     let mut subject = None;
@@ -60,7 +60,7 @@ pub fn parse_commit(message: &str) -> ParsedCommit {
     if let Some(caps) = header_re.captures(&header_line) {
         type_ = caps.get(1).map(|m| m.as_str().to_string()).filter(|s| !s.is_empty());
         scope = caps.get(2).map(|m| m.as_str().to_string()).filter(|s| !s.is_empty());
-        subject = caps.get(3).map(|m| m.as_str().to_string()).filter(|s| !s.is_empty());
+        subject = caps.get(4).map(|m| m.as_str().to_string()).filter(|s| !s.is_empty());
     }
 
     let mut body_lines = Vec::new();

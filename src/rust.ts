@@ -1,18 +1,42 @@
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
+import process from "node:process";
 import { fileURLToPath } from "node:url";
-import type { LintOutcome } from "./types.js";
+import type { LintOutcome, ParsedCommit } from "./types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const binPath = path.resolve(__dirname, "../target/release/commitlint-rs");
+
+export function getBinaryPath(): string {
+  if (process.env.COMMITLINT_BIN && fs.existsSync(process.env.COMMITLINT_BIN)) {
+    return process.env.COMMITLINT_BIN;
+  }
+
+  const exeName = process.platform === "win32" ? "commitlint-rs.exe" : "commitlint-rs";
+  const candidates = [
+    path.resolve(__dirname, "./bin", exeName),
+    path.resolve(__dirname, "../dist/bin", exeName),
+    path.resolve(__dirname, "../target/release", exeName),
+    path.resolve(__dirname, "../target/debug", exeName),
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return exeName;
+}
 
 export function lintCommit(message: string): LintOutcome {
-  const res = spawnSync(binPath, [message, "--json"], { encoding: "utf-8" });
+  const bin = getBinaryPath();
+  const res = spawnSync(bin, [message, "--json"], { encoding: "utf-8" });
   if (res.stdout) {
     try {
       return JSON.parse(res.stdout.trim());
     } catch {
-      // Fallback if parsing output fails
+      // Fallback
     }
   }
   return {
@@ -33,7 +57,32 @@ export function lintCommit(message: string): LintOutcome {
   };
 }
 
+export function parseCommit(message: string): ParsedCommit {
+  const bin = getBinaryPath();
+  const res = spawnSync(bin, ["--parse", message], { encoding: "utf-8" });
+  if (res.stdout) {
+    try {
+      return JSON.parse(res.stdout.trim());
+    } catch {
+      // Fallback
+    }
+  }
+  return {
+    raw: message,
+    header: message.split("\n")[0] || null,
+    type: null,
+    scope: null,
+    subject: null,
+    body: null,
+    footer: null,
+    notes: [],
+    references: [],
+    mentions: [],
+  };
+}
+
 export function runCommitlintCli(args: string[] = process.argv.slice(2)): number {
-  const res = spawnSync(binPath, args, { stdio: "inherit" });
+  const bin = getBinaryPath();
+  const res = spawnSync(bin, args, { stdio: "inherit" });
   return res.status ?? 0;
 }
