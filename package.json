@@ -11,8 +11,8 @@
   ],
   "license": "MIT",
   "bin": {
-    "commitlint": "./dist/cli.js",
-    "vite-plus-commitlint": "./dist/cli.js"
+    "commitlint": "dist/cli.js",
+    "vite-plus-commitlint": "dist/cli.js"
   },
   "files": [
     "dist"
