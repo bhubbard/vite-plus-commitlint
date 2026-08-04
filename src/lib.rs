@@ -1,7 +1,10 @@
 #![deny(clippy::all)]
 
+pub mod config;
+pub mod formatter;
 pub mod linter;
 pub mod parser;
+pub mod reader;
 pub mod rules;
 
 #[cfg(feature = "napi-binding")]

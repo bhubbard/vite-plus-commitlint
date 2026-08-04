@@ -1,30 +1,12 @@
-use serde_json::Value;
-use std::collections::HashMap;
 use std::env;
-use std::fs;
-use std::io::{self, Read};
 use std::process;
+use vite_plus_commitlint::config::load_config;
+use vite_plus_commitlint::formatter::{format_report, FormatOptions};
 use vite_plus_commitlint::linter::lint_commit;
-
-fn get_default_rules() -> HashMap<String, Value> {
-    let raw = r#"{
-        "body-leading-blank": [1, "always"],
-        "footer-leading-blank": [1, "always"],
-        "header-max-length": [2, "always", 72],
-        "scope-case": [2, "always", "lower-case"],
-        "subject-case": [2, "never", ["sentence-case", "start-case", "pascal-case", "upper-case"]],
-        "subject-empty": [2, "never"],
-        "subject-full-stop": [2, "never", "."],
-        "type-case": [2, "always", "lower-case"],
-        "type-empty": [2, "never"],
-        "type-enum": [2, "always", ["build", "chore", "ci", "docs", "feat", "fix", "perf", "refactor", "revert", "style", "test"]]
-    }"#;
-    serde_json::from_str(raw).unwrap()
-}
+use vite_plus_commitlint::reader::{read_commit_messages, read_stdin, ReadOptions};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let mut message = String::new();
 
     if args.len() > 1 && (args[1] == "--help" || args[1] == "-h") {
         println!(
@@ -33,48 +15,57 @@ fn main() {
         process::exit(0);
     }
 
+    let cwd = env::current_dir()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_else(|_| ".".to_string());
+    let config = load_config(&cwd);
+
+    let mut messages = Vec::new();
+
     if args.len() > 1 && !args[1].starts_with('-') {
-        message = args[1..].join(" ");
+        messages.push(args[1..].join(" "));
     } else {
-        let _ = io::stdin().read_to_string(&mut message);
-        if message.trim().is_empty() {
-            if let Ok(content) = fs::read_to_string(".git/COMMIT_EDITMSG") {
-                message = content;
-            }
+        let stdin_msg = read_stdin();
+        if !stdin_msg.is_empty() {
+            messages.push(stdin_msg);
+        } else {
+            let options = ReadOptions {
+                cwd: Some(cwd.clone()),
+                edit: Some("true".to_string()),
+                ..Default::default()
+            };
+            messages = read_commit_messages(&options);
         }
     }
 
-    let cleaned = message
-        .lines()
-        .filter(|line| !line.trim().starts_with('#'))
-        .collect::<Vec<&str>>()
-        .join("\n")
-        .trim()
-        .to_string();
-
-    if cleaned.is_empty() {
-        eprintln!("No commit message provided.");
+    if messages.is_empty() {
+        eprintln!("No commit messages found to lint.");
         process::exit(1);
     }
 
-    let rules = get_default_rules();
-    let outcome = lint_commit(&cleaned, &rules);
+    let mut total_errors = 0;
+    let mut _total_warnings = 0;
 
-    if !outcome.valid {
-        eprintln!("⧗   input: {}", cleaned.lines().next().unwrap_or(""));
-        for err in &outcome.errors {
-            eprintln!("  ✖   {} [{}]", err.message, err.name);
-        }
-        for warn in &outcome.warnings {
-            eprintln!("  ⚠   {} [{}]", warn.message, warn.name);
-        }
-        eprintln!(
-            "\n✖   found {} error(s), {} warning(s)",
-            outcome.errors.len(),
-            outcome.warnings.len()
+    for msg in &messages {
+        let outcome = lint_commit(msg, &config.rules);
+        total_errors += outcome.errors.len();
+        _total_warnings += outcome.warnings.len();
+
+        let output = format_report(
+            &outcome,
+            &FormatOptions {
+                color: true,
+                verbose: false,
+                help_url: config.help_url.clone(),
+            },
         );
+
+        if !output.is_empty() {
+            println!("{}", output);
+        }
+    }
+
+    if total_errors > 0 {
         process::exit(1);
-    } else {
-        println!("✔   commit message valid");
     }
 }
