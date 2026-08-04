@@ -26,19 +26,11 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    },
-    "./rules": {
-      "import": "./dist/rules/index.js",
-      "types": "./dist/rules/index.d.ts"
-    },
-    "./presets/conventional": {
-      "import": "./dist/presets/conventional.js",
-      "types": "./dist/presets/conventional.d.ts"
     }
   },
   "scripts": {
     "build:cargo": "cargo build --release",
-    "build": "cargo build --release && tsdown src/index.ts src/cli.ts src/rules/index.ts src/presets/conventional.ts --dts",
+    "build": "cargo build --release && tsdown src/index.ts src/cli.ts --dts",
     "test": "vitest run",
     "check": "oxlint && oxfmt --check"
   },

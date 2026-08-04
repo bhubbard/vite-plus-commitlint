@@ -1,10 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { lintCommit, parseCommit } from "./linter.js";
-import { conventionalPreset } from "./presets/conventional.js";
-import { rules } from "./rules/index.js";
+import { lintCommit } from "./rust.js";
 
-describe("Conventional Commit Ruleset", () => {
-  it("passes valid conventional commit messages", async () => {
+describe("Rust-Backed Commit Linter", () => {
+  it("passes valid conventional commit messages", () => {
     const validMessages = [
       "feat: add new button component",
       "fix(ui): resolve alignment issue on mobile",
@@ -15,13 +13,13 @@ describe("Conventional Commit Ruleset", () => {
     ];
 
     for (const msg of validMessages) {
-      const outcome = await lintCommit(msg, conventionalPreset.rules);
+      const outcome = lintCommit(msg);
       expect(outcome.valid, `Expected "${msg}" to be valid`).toBe(true);
       expect(outcome.errors).toHaveLength(0);
     }
   });
 
-  it("fails invalid conventional commit messages", async () => {
+  it("fails invalid conventional commit messages", () => {
     const invalidMessages = [
       { msg: "ADD NEW FEATURE", expectedRule: "type-empty" },
       { msg: "feat: Add New Feature", expectedRule: "subject-case" },
@@ -31,30 +29,10 @@ describe("Conventional Commit Ruleset", () => {
     ];
 
     for (const { msg, expectedRule } of invalidMessages) {
-      const outcome = await lintCommit(msg, conventionalPreset.rules);
+      const outcome = lintCommit(msg);
       expect(outcome.valid, `Expected "${msg}" to fail`).toBe(false);
       const hasError = outcome.errors.some((err) => err.name === expectedRule);
       expect(hasError, `Expected rule ${expectedRule} to fail for "${msg}"`).toBe(true);
     }
-  });
-});
-
-describe("Commit Parser", () => {
-  it("correctly parses conventional commit structure", () => {
-    const parsed = parseCommit("feat(auth): add OAuth2 login flow");
-    expect(parsed.type).toBe("feat");
-    expect(parsed.scope).toBe("auth");
-    expect(parsed.subject).toBe("add OAuth2 login flow");
-    expect(parsed.header).toBe("feat(auth): add OAuth2 login flow");
-  });
-});
-
-describe("Rules Registry", () => {
-  it("contains all core rules", () => {
-    expect(rules["type-enum"]).toBeDefined();
-    expect(rules["header-max-length"]).toBeDefined();
-    expect(rules["subject-empty"]).toBeDefined();
-    expect(rules["subject-case"]).toBeDefined();
-    expect(rules["subject-full-stop"]).toBeDefined();
   });
 });

@@ -7,6 +7,7 @@ use vite_plus_commitlint::reader::{read_commit_messages, read_stdin, ReadOptions
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+    let is_json = args.iter().any(|a| a == "--json");
 
     if args.len() > 1 && (args[1] == "--help" || args[1] == "-h") {
         println!(
@@ -20,10 +21,17 @@ fn main() {
         .unwrap_or_else(|_| ".".to_string());
     let config = load_config(&cwd);
 
+    let positional_args: Vec<String> = args
+        .iter()
+        .skip(1)
+        .filter(|a| !a.starts_with('-'))
+        .cloned()
+        .collect();
+
     let mut messages = Vec::new();
 
-    if args.len() > 1 && !args[1].starts_with('-') {
-        messages.push(args[1..].join(" "));
+    if !positional_args.is_empty() {
+        messages.push(positional_args.join(" "));
     } else {
         let stdin_msg = read_stdin();
         if !stdin_msg.is_empty() {
@@ -39,7 +47,11 @@ fn main() {
     }
 
     if messages.is_empty() {
-        eprintln!("No commit messages found to lint.");
+        if is_json {
+            println!("{{\"valid\":false,\"errors\":[{{\"valid\":false,\"level\":2,\"name\":\"input-empty\",\"message\":\"No commit messages found to lint.\"}}],\"warnings\":[]}}");
+        } else {
+            eprintln!("No commit messages found to lint.");
+        }
         process::exit(1);
     }
 
@@ -51,17 +63,21 @@ fn main() {
         total_errors += outcome.errors.len();
         _total_warnings += outcome.warnings.len();
 
-        let output = format_report(
-            &outcome,
-            &FormatOptions {
-                color: true,
-                verbose: false,
-                help_url: config.help_url.clone(),
-            },
-        );
+        if is_json {
+            println!("{}", serde_json::to_string(&outcome).unwrap_or_default());
+        } else {
+            let output = format_report(
+                &outcome,
+                &FormatOptions {
+                    color: true,
+                    verbose: false,
+                    help_url: config.help_url.clone(),
+                },
+            );
 
-        if !output.is_empty() {
-            println!("{}", output);
+            if !output.is_empty() {
+                println!("{}", output);
+            }
         }
     }
 
