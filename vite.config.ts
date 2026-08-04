@@ -1,6 +1,12 @@
 import { defineConfig } from "vite-plus";
 
 export default defineConfig({
+  fmt: {
+    ignorePatterns: ["dist/**", "target/**", "node_modules/**"],
+  },
+  lint: {
+    ignorePatterns: ["dist/**", "target/**", "node_modules/**"],
+  },
   pack: {
     entry: ["src/index.ts", "src/cli.ts"],
     format: ["esm"],

@@ -22,6 +22,16 @@ export function getBinaryPath(): string {
 
   for (const candidate of candidates) {
     if (fs.existsSync(candidate)) {
+      if (process.platform !== "win32") {
+        try {
+          const mode = fs.statSync(candidate).mode;
+          if ((mode & 0o111) === 0) {
+            fs.chmodSync(candidate, 0o755);
+          }
+        } catch {
+          // Ignore read-only filesystem errors
+        }
+      }
       return candidate;
     }
   }
