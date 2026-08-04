@@ -20,10 +20,7 @@ pub struct LintOutcome {
     pub warnings: Vec<LintRuleOutcome>,
 }
 
-pub fn lint_commit(
-    message: &str,
-    rules_config: &HashMap<String, Value>,
-) -> LintOutcome {
+pub fn lint_commit(message: &str, rules_config: &HashMap<String, Value>) -> LintOutcome {
     let trimmed = message.trim();
 
     if trimmed.starts_with("Fixup!")
@@ -49,7 +46,7 @@ pub fn lint_commit(
                 continue;
             }
 
-            let level = arr.get(0).and_then(|v| v.as_u64()).unwrap_or(0) as u8;
+            let level = arr.first().and_then(|v| v.as_u64()).unwrap_or(0) as u8;
             if level == 0 {
                 continue;
             }

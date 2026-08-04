@@ -75,7 +75,7 @@ describe("Vite Plugin & Middleware", () => {
       },
     };
 
-    plugin.configureServer!(fakeServer);
+    (plugin.configureServer as (server: any) => void)(fakeServer);
     expect(handler).toBeDefined();
 
     let _statusCode = 200;

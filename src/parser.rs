@@ -1,5 +1,16 @@
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use std::sync::LazyLock;
+
+static REVERT_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"(?i)^revert\s+"?(.*?)"?\s*$"#).unwrap());
+static HEADER_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"^([a-zA-Z0-9_-]+)(?:\((.*)\))?(!)?:\s*(.*)$"#).unwrap());
+static BREAKING_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"(?i)(?:^|\n)BREAKING[ -]CHANGE:\s*([\s\S]*)"#).unwrap());
+static REF_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"(?:([a-zA-Z0-9_-]+)\s+)?#(\d+)"#).unwrap());
+static MENTION_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r#"@([a-zA-Z0-9_/-]+)"#).unwrap());
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommitNote {
@@ -44,23 +55,30 @@ pub fn parse_commit(message: &str) -> ParsedCommit {
     let header_line = lines.first().copied().unwrap_or("").to_string();
 
     let mut revert = None;
-    let revert_re = Regex::new(r#"(?i)^revert\s+"?(.*?)"?\s*$"#).unwrap();
-    if let Some(caps) = revert_re.captures(&header_line) {
+    if let Some(caps) = REVERT_RE.captures(&header_line) {
         revert = Some(RevertInfo {
             header: caps.get(1).map_or("", |m| m.as_str()).to_string(),
             hash: None,
         });
     }
 
-    let header_re = Regex::new(r#"^([a-zA-Z0-9_-]+)(?:\((.*)\))?(!)?:\s*(.*)$"#).unwrap();
     let mut type_ = None;
     let mut scope = None;
     let mut subject = None;
 
-    if let Some(caps) = header_re.captures(&header_line) {
-        type_ = caps.get(1).map(|m| m.as_str().to_string()).filter(|s| !s.is_empty());
-        scope = caps.get(2).map(|m| m.as_str().to_string()).filter(|s| !s.is_empty());
-        subject = caps.get(4).map(|m| m.as_str().to_string()).filter(|s| !s.is_empty());
+    if let Some(caps) = HEADER_RE.captures(&header_line) {
+        type_ = caps
+            .get(1)
+            .map(|m| m.as_str().to_string())
+            .filter(|s| !s.is_empty());
+        scope = caps
+            .get(2)
+            .map(|m| m.as_str().to_string())
+            .filter(|s| !s.is_empty());
+        subject = caps
+            .get(4)
+            .map(|m| m.as_str().to_string())
+            .filter(|s| !s.is_empty());
     }
 
     let mut body_lines = Vec::new();
@@ -85,14 +103,21 @@ pub fn parse_commit(message: &str) -> ParsedCommit {
     }
 
     let body_str = body_lines.join("\n").trim().to_string();
-    let body = if body_str.is_empty() { None } else { Some(body_str) };
+    let body = if body_str.is_empty() {
+        None
+    } else {
+        Some(body_str)
+    };
 
     let footer_str = footer_lines.join("\n").trim().to_string();
-    let footer = if footer_str.is_empty() { None } else { Some(footer_str) };
+    let footer = if footer_str.is_empty() {
+        None
+    } else {
+        Some(footer_str)
+    };
 
     let mut notes = Vec::new();
-    let breaking_re = Regex::new(r#"(?i)(?:^|\n)BREAKING[ -]CHANGE:\s*([\s\S]*)"#).unwrap();
-    if let Some(caps) = breaking_re.captures(message) {
+    if let Some(caps) = BREAKING_RE.captures(message) {
         notes.push(CommitNote {
             title: "BREAKING CHANGE".to_string(),
             text: caps.get(1).map_or("", |m| m.as_str()).trim().to_string(),
@@ -100,8 +125,7 @@ pub fn parse_commit(message: &str) -> ParsedCommit {
     }
 
     let mut references = Vec::new();
-    let ref_re = Regex::new(r#"(?:([a-zA-Z0-9_-]+)\s+)?#(\d+)"#).unwrap();
-    for caps in ref_re.captures_iter(message) {
+    for caps in REF_RE.captures_iter(message) {
         references.push(CommitReference {
             action: caps.get(1).map(|m| m.as_str().to_string()),
             owner: None,
@@ -113,14 +137,17 @@ pub fn parse_commit(message: &str) -> ParsedCommit {
     }
 
     let mut mentions = Vec::new();
-    let mention_re = Regex::new(r#"@([a-zA-Z0-9_/-]+)"#).unwrap();
-    for caps in mention_re.captures_iter(message) {
+    for caps in MENTION_RE.captures_iter(message) {
         mentions.push(caps.get(1).map_or("", |m| m.as_str()).to_string());
     }
 
     ParsedCommit {
         raw: message.to_string(),
-        header: if header_line.is_empty() { None } else { Some(header_line) },
+        header: if header_line.is_empty() {
+            None
+        } else {
+            Some(header_line)
+        },
         type_,
         scope,
         subject,
@@ -139,7 +166,8 @@ mod tests {
 
     #[test]
     fn test_parse_conventional_commit() {
-        let msg = "feat(scope): add new rust feature\n\nBody paragraph\n\nBREAKING CHANGE: breaks stuff";
+        let msg =
+            "feat(scope): add new rust feature\n\nBody paragraph\n\nBREAKING CHANGE: breaks stuff";
         let parsed = parse_commit(msg);
         assert_eq!(parsed.type_.as_deref(), Some("feat"));
         assert_eq!(parsed.scope.as_deref(), Some("scope"));

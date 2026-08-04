@@ -26,8 +26,9 @@ pub fn load_config(cwd: &str) -> LoadedConfig {
                         json.get("rules")
                     };
 
-                    let help_url =
-                        json.get("helpUrl").and_then(|h| h.as_str().map(|s| s.to_string()));
+                    let help_url = json
+                        .get("helpUrl")
+                        .and_then(|h| h.as_str().map(|s| s.to_string()));
 
                     if let Some(rules_obj) = rules_val.and_then(|r| r.as_object()) {
                         let mut rules = HashMap::new();
@@ -56,5 +57,18 @@ pub fn load_config(cwd: &str) -> LoadedConfig {
     LoadedConfig {
         rules: serde_json::from_str(default_raw).unwrap(),
         help_url: None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_load_default_config_for_nonexistent_dir() {
+        let config = load_config("/path/to/nonexistent/directory");
+        assert!(config.rules.contains_key("type-enum"));
+        assert!(config.rules.contains_key("header-max-length"));
+        assert_eq!(config.help_url, None);
     }
 }

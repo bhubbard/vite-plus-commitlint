@@ -133,7 +133,10 @@ fn main() {
 
     if let Some(fmt) = print_config {
         if fmt == "json" || is_json {
-            println!("{}", serde_json::to_string_pretty(&config).unwrap_or_default());
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&config).unwrap_or_default()
+            );
         } else {
             println!("Rules: {:#?}", config.rules);
         }

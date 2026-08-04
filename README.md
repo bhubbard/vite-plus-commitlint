@@ -84,7 +84,7 @@ vp exec vite-plus-commitlint --print-config json
 # Lint commit range from git history
 vp exec vite-plus-commitlint --from HEAD~3 --to HEAD
 
-# Run in strict mode (exit code 2 for warnings, 3 for errors)
+# Run in strict mode (exit code 1 for errors, 2 for warnings)
 vp exec vite-plus-commitlint --edit --strict
 ```
 
@@ -101,7 +101,7 @@ console.log(parsed.type); // 'feat'
 console.log(parsed.scope); // 'ui'
 
 // Lint a commit message against rules
-const report = await lintCommit("fix: resolve alignment", conventionalPreset.rules);
+const report = lintCommit("fix: resolve alignment");
 console.log(report.valid); // true
 ```
 

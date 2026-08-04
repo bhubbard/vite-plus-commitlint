@@ -19,9 +19,10 @@ export function commitlint(options: CommitlintPluginOptions = {}): Plugin {
               const result = lintCommit(message);
               res.setHeader("Content-Type", "application/json");
               res.end(JSON.stringify(result));
-            } catch (err: any) {
+            } catch (err: unknown) {
+              const errorMessage = err instanceof Error ? err.message : String(err);
               res.statusCode = 400;
-              res.end(JSON.stringify({ error: err.message }));
+              res.end(JSON.stringify({ error: errorMessage }));
             }
           });
         } else {
