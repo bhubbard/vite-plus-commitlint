@@ -6,6 +6,7 @@
     "commitlint",
     "conventional-commits",
     "git-hooks",
+    "rust",
     "vite",
     "vite-plus"
   ],
@@ -36,11 +37,13 @@
     }
   },
   "scripts": {
-    "build": "tsdown src/index.ts src/cli.ts src/rules/index.ts src/presets/conventional.ts --dts",
+    "build:cargo": "cargo build --release",
+    "build": "cargo build --release && tsdown src/index.ts src/cli.ts src/rules/index.ts src/presets/conventional.ts --dts",
     "test": "vitest run",
     "check": "oxlint && oxfmt --check"
   },
   "devDependencies": {
+    "@napi-rs/cli": "^3.0.0",
     "@types/node": "^22.0.0",
     "tsdown": "^0.15.0",
     "typescript": "^5.7.0",
