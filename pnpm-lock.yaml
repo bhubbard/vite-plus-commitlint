@@ -208,25 +208,25 @@ importers:
   .:
     devDependencies:
       '@napi-rs/cli':
-        specifier: ^3.0.0
+        specifier: ^3.8.2
         version: 3.8.2(@emnapi/runtime@1.11.2)(@types/node@22.20.1)
       '@types/node':
-        specifier: ^22.0.0
+        specifier: ^22.20.1
         version: 22.20.1
       tsdown:
-        specifier: ^0.15.0
+        specifier: ^0.15.12
         version: 0.15.12(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.2)(typescript@5.9.3)
       typescript:
-        specifier: ^5.7.0
+        specifier: ^5.9.3
         version: 5.9.3
       vite:
-        specifier: ^6.0.0
+        specifier: ^6.4.3
         version: 6.4.3(@types/node@22.20.1)(jiti@2.7.0)(lightningcss@1.33.0)
       vite-plus:
-        specifier: ^0.1.0
+        specifier: ^0.1.24
         version: 0.1.24(@types/node@22.20.1)(jiti@2.7.0)(typescript@5.9.3)(vite@6.4.3(@types/node@22.20.1)(jiti@2.7.0)(lightningcss@1.33.0))
       vitest:
-        specifier: ^3.0.0
+        specifier: ^3.2.7
         version: 3.2.7(@types/node@22.20.1)(jiti@2.7.0)(lightningcss@1.33.0)
 
 packages:

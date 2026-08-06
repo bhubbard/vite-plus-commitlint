@@ -662,4 +662,58 @@ mod tests {
         let (valid2, _) = evaluate_rule("subject-full-stop", &parsed_no_dot, "never", &val);
         assert!(valid2);
     }
+
+    #[test]
+    fn test_evaluate_rule_scope_enum() {
+        let parsed = parse_commit("feat(ui): add button");
+        let val = json!(["ui", "core"]);
+        let (valid, _) = evaluate_rule("scope-enum", &parsed, "always", &val);
+        assert!(valid);
+
+        let (invalid, _) = evaluate_rule("scope-enum", &parsed, "never", &val);
+        assert!(!invalid);
+    }
+
+    #[test]
+    fn test_evaluate_rule_body_empty() {
+        let parsed_empty = parse_commit("feat: subject line");
+        let (valid, _) = evaluate_rule("body-empty", &parsed_empty, "always", &json!(null));
+        assert!(valid);
+
+        let parsed_with_body = parse_commit("feat: subject line\n\nSome body text");
+        let (valid_body, _) = evaluate_rule("body-empty", &parsed_with_body, "never", &json!(null));
+        assert!(valid_body);
+    }
+
+    #[test]
+    fn test_evaluate_rule_signed_off_by() {
+        let parsed =
+            parse_commit("feat: add feature\n\nSigned-off-by: Developer <dev@example.com>");
+        let val = json!("Signed-off-by:");
+        let (valid, _) = evaluate_rule("signed-off-by", &parsed, "always", &val);
+        assert!(valid);
+    }
+
+    #[test]
+    fn test_evaluate_rule_breaking_change_exclamation_mark() {
+        let parsed_valid =
+            parse_commit("feat(core)!: breaking change\n\nBREAKING CHANGE: API changed");
+        let (valid, _) = evaluate_rule(
+            "breaking-change-exclamation-mark",
+            &parsed_valid,
+            "always",
+            &json!(null),
+        );
+        assert!(valid);
+
+        let parsed_mismatch =
+            parse_commit("feat(core): normal commit\n\nBREAKING CHANGE: API changed");
+        let (invalid, _) = evaluate_rule(
+            "breaking-change-exclamation-mark",
+            &parsed_mismatch,
+            "always",
+            &json!(null),
+        );
+        assert!(!invalid);
+    }
 }

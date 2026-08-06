@@ -102,11 +102,66 @@ describe("Vite Plugin & Middleware", () => {
     const parsed = JSON.parse(responseData);
     expect(parsed.valid).toBe(true);
   });
+
+  it("handles middleware error for invalid request payload", () => {
+    const plugin = commitlint();
+    let handler: any;
+    const fakeServer: any = {
+      middlewares: {
+        use: (path: string, fn: any) => {
+          if (path === "/__commitlint/validate") {
+            handler = fn;
+          }
+        },
+      },
+    };
+
+    (plugin.configureServer as (server: any) => void)(fakeServer);
+
+    let statusCode = 200;
+    let responseData = "";
+
+    const fakeReq: any = {
+      method: "POST",
+      on: (event: string, cb: any) => {
+        if (event === "data") cb("invalid json");
+        if (event === "end") cb();
+      },
+    };
+    const fakeRes: any = {
+      statusCode: 200,
+      setHeader: () => {},
+      end: (data: string) => {
+        responseData = data;
+      },
+    };
+    Object.defineProperty(fakeRes, "statusCode", {
+      set: (val: number) => {
+        statusCode = val;
+      },
+      get: () => statusCode,
+    });
+
+    handler(fakeReq, fakeRes);
+    expect(statusCode).toBe(400);
+    const parsed = JSON.parse(responseData);
+    expect(parsed.error).toBeDefined();
+  });
 });
 
 describe("CLI Integration", () => {
   it("runs CLI with --print-config json without crashing", () => {
     const exitCode = runCommitlintCli(["--print-config", "json"]);
+    expect(exitCode).toBe(0);
+  });
+
+  it("runs CLI with --version without crashing", () => {
+    const exitCode = runCommitlintCli(["--version"]);
+    expect(exitCode).toBe(0);
+  });
+
+  it("runs CLI with --help without crashing", () => {
+    const exitCode = runCommitlintCli(["--help"]);
     expect(exitCode).toBe(0);
   });
 });

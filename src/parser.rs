@@ -176,4 +176,24 @@ mod tests {
         assert_eq!(parsed.notes.len(), 1);
         assert_eq!(parsed.notes[0].title, "BREAKING CHANGE");
     }
+
+    #[test]
+    fn test_parse_revert_commit() {
+        let msg = r#"revert "feat: add button""#;
+        let parsed = parse_commit(msg);
+        assert!(parsed.revert.is_some());
+        assert_eq!(parsed.revert.unwrap().header, "feat: add button");
+    }
+
+    #[test]
+    fn test_parse_references_and_mentions() {
+        let msg = "fix(auth): resolve login crash\n\nCloses #42 and fixes #108. CC @octocat";
+        let parsed = parse_commit(msg);
+        assert_eq!(parsed.type_.as_deref(), Some("fix"));
+        assert_eq!(parsed.scope.as_deref(), Some("auth"));
+        assert_eq!(parsed.references.len(), 2);
+        assert_eq!(parsed.references[0].issue, "42");
+        assert_eq!(parsed.references[1].issue, "108");
+        assert_eq!(parsed.mentions, vec!["octocat"]);
+    }
 }
