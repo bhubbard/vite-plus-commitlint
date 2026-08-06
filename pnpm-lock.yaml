@@ -225,6 +225,9 @@ importers:
       vite-plus:
         specifier: ^0.1.24
         version: 0.1.24(@types/node@22.20.1)(jiti@2.7.0)(typescript@5.9.3)(vite@6.4.3(@types/node@22.20.1)(jiti@2.7.0)(lightningcss@1.33.0))
+      vite-plus-commitlint:
+        specifier: ^1.1.3
+        version: 1.1.3
       vitest:
         specifier: ^3.2.7
         version: 3.2.7(@types/node@22.20.1)(jiti@2.7.0)(lightningcss@1.33.0)
@@ -2203,6 +2206,11 @@ packages:
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
 
+  vite-plus-commitlint@1.1.3:
+    resolution: {integrity: sha512-8Nz7q7oEF6K9L4Z9jJy60WFYNUTP9y4Iqet073bfU2VIcu2Y+5sjTp5NepwY7mvLSy+FxPi3rpmgABhKX/yD8A==}
+    engines: {node: '>=22.12.0'}
+    hasBin: true
+
   vite-plus@0.1.24:
     resolution: {integrity: sha512-b3fr6WtCiEhetjuzW/4KcEMOAMuZxoxZATWaXKmPzOLf1upG+pzKJOFZTb94D6wiPBlwcjxoaUtF7C3uAN+VjQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -3795,6 +3803,8 @@ snapshots:
       - terser
       - tsx
       - yaml
+
+  vite-plus-commitlint@1.1.3: {}
 
   vite-plus@0.1.24(@types/node@22.20.1)(jiti@2.7.0)(typescript@5.9.3)(vite@6.4.3(@types/node@22.20.1)(jiti@2.7.0)(lightningcss@1.33.0)):
     dependencies:

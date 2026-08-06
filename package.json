@@ -32,7 +32,8 @@
     "build:cargo": "cargo build --release",
     "build": "cargo build --release && tsdown src/index.ts src/cli.ts --dts && mkdir -p dist/bin && cp target/release/commitlint-rs* dist/bin/ && chmod +x dist/bin/commitlint-rs*",
     "test": "vitest run",
-    "check": "vp lint && vp fmt --check"
+    "check": "vp lint && vp fmt --check",
+    "commitlint": "vite-plus-commitlint"
   },
   "devDependencies": {
     "@napi-rs/cli": "^3.8.2",
@@ -41,7 +42,8 @@
     "typescript": "^5.9.3",
     "vite": "^6.4.3",
     "vite-plus": "^0.1.24",
-    "vitest": "^3.2.7"
+    "vitest": "^3.2.7",
+    "vite-plus-commitlint": "^1.1.3"
   },
   "engines": {
     "node": ">=22.12.0"
