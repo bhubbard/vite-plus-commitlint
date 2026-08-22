@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vite+ Commitlint — Vite+ & Cloudflare Developer Tooling</title>
+    <meta name="description" content="Unified Commitlint plugin and Rust-powered CLI for the Vite+ toolchain.">
+    <meta name="keywords" content="vite-plus, commitlint, conventional commits, git hooks, rust commitlint, linter, vite plugin">
+    <meta name="author" content="Brandon Hubbard">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bhubbard.github.io/vite-plus-commitlint/">
+
+    <!-- OpenGraph / Social Metadata -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bhubbard.github.io/vite-plus-commitlint/">
+    <meta property="og:title" content="Vite+ Commitlint — Vite+ & Cloudflare Developer Tooling">
+    <meta property="og:description" content="Unified Commitlint plugin and Rust-powered CLI for the Vite+ toolchain.">
+    <meta property="og:site_name" content="Vite+ Commitlint">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://bhubbard.github.io/vite-plus-commitlint/">
+    <meta name="twitter:title" content="Vite+ Commitlint — Vite+ & Cloudflare Developer Tooling">
+    <meta name="twitter:description" content="Unified Commitlint plugin and Rust-powered CLI for the Vite+ toolchain.">
+
+    <!-- Schema.org JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Vite+ Commitlint",
+      "headline": "Unified Commitlint plugin and Rust-powered CLI for the Vite+ toolchain.",
+      "description": "Ultra-fast Conventional Commits validator and Git hook integration built in Rust for the Vite+ unified frontend toolchain. Enforces semantic commit messages across local workflows and CI pipelines in microseconds.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS, Linux, Windows",
+      "programmingLanguage": "TypeScript, Rust",
+      "license": "https://opensource.org/licenses/MIT",
+      "author": {
+        "@type": "Person",
+        "name": "Brandon Hubbard",
+        "url": "https://brandonhubbard.com"
+      },
+      "codeRepository": "https://github.com/bhubbard/vite-plus-commitlint",
+      "url": "https://bhubbard.github.io/vite-plus-commitlint/"
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --void: #0a0a0a;
+            --charcoal: #121212;
+            --concrete: #262626;
+            --titanium: #ffffff;
+            --steel: #888888;
+            --cobalt: #3B82F6;
+            --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border-radius: 0 !important;
+        }
+        body {
+            background-color: var(--void);
+            color: var(--titanium);
+            font-family: var(--font-display);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        /* Header & Navigation */
+        header {
+            border-bottom: 1px solid var(--concrete);
+            background: var(--void);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+        }
+        .tool-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: var(--titanium);
+        }
+        .tool-icon-box {
+            width: 36px;
+            height: 36px;
+            background: var(--cobalt);
+            color: var(--void);
+            font-family: var(--font-mono);
+            font-weight: 800;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: -0.5px;
+        }
+        .tool-name-text {
+            font-size: 0.95rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .tool-sub-text {
+            font-size: 0.75rem;
+            color: var(--steel);
+            font-family: var(--font-mono);
+            display: block;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            list-style: none;
+        }
+        .nav-link {
+            color: var(--steel);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            transition: color 0.2s;
+        }
+        .nav-link:hover {
+            color: var(--titanium);
+        }
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--charcoal);
+            border: 1px solid var(--concrete);
+            color: var(--titanium);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover {
+            border-color: var(--cobalt);
+            background: #1a1a1a;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            border-bottom: 1px solid var(--concrete);
+            padding-bottom: 3rem;
+            margin-bottom: 3rem;
+        }
+        .hero-badge {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--cobalt);
+            border: 1px solid var(--concrete);
+            padding: 0.35rem 0.75rem;
+            margin-bottom: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--charcoal);
+        }
+        .hero-title {
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.25rem;
+        }
+        .hero-tagline {
+            font-size: 1.25rem;
+            color: var(--steel);
+            max-width: 800px;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .btn-primary {
+            background: var(--titanium);
+            color: var(--void);
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 0.85rem 1.75rem;
+            text-decoration: none;
+            border: 1px solid var(--titanium);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            background: #e2e2e2;
+        }
+        .btn-secondary {
+            background: var(--charcoal);
+            color: var(--titanium);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            padding: 0.85rem 1.75rem;
+            text-decoration: none;
+            border: 1px solid var(--concrete);
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            border-color: var(--cobalt);
+        }
+
+        /* Section Layout */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .section-title::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--cobalt);
+        }
+
+        /* Swiss Grid & Cards */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .card {
+            background: var(--charcoal);
+            border: 1px solid var(--concrete);
+            padding: 1.75rem;
+        }
+        .card-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--titanium);
+        }
+        .card-desc {
+            color: var(--steel);
+            font-size: 0.9rem;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #050505;
+            border: 1px solid var(--concrete);
+            padding: 1rem 1.25rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #d4d4d4;
+            overflow-x: auto;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        .code-block code {
+            color: #38bdf8;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--charcoal);
+            border: 1px solid var(--concrete);
+            color: var(--steel);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover {
+            color: var(--titanium);
+            border-color: var(--titanium);
+        }
+
+        /* Table */
+        .table-wrap {
+            overflow-x: auto;
+            margin-bottom: 3rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid var(--concrete);
+            background: var(--charcoal);
+            font-size: 0.88rem;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--concrete);
+        }
+        th {
+            background: #181818;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--steel);
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .badge-err {
+            color: #f43f5e;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .badge-warn {
+            color: #f59e0b;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .badge-info {
+            color: #06b6d4;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--concrete);
+            padding: 3rem 1.5rem;
+            background: var(--void);
+        }
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .footer-text {
+            color: var(--steel);
+            font-size: 0.85rem;
+        }
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+        .footer-link {
+            color: var(--steel);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            transition: color 0.2s;
+        }
+        .footer-link:hover {
+            color: var(--titanium);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="./" class="tool-brand" aria-label="Vite+ Commitlint Home">
+                <div class="tool-icon-box">CL</div>
+                <div>
+                    <span class="tool-name-text">vite-plus-commitlint</span>
+                    <span class="tool-sub-text">VITE+ PLUGIN & LINTER</span>
+                </div>
+            </a>
+            <nav aria-label="Main Navigation">
+                <ul class="nav-links">
+                    <li><a href="#overview" class="nav-link">OVERVIEW</a></li>
+                    <li><a href="#cli" class="nav-link">CLI</a></li>
+                    <li><a href="#rules" class="nav-link">SPECIFICATIONS</a></li>
+                    <li><a href="https://github.com/bhubbard/vite-plus-commitlint" class="nav-btn" target="_blank" rel="noopener">GitHub ↗</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero" id="overview">
+            <div class="hero-badge">VITE+ PLUGIN & LINTER • v1.1.3</div>
+            <h1 class="hero-title">Vite+ Commitlint</h1>
+            <p class="hero-tagline">Unified Commitlint plugin and Rust-powered CLI for the Vite+ toolchain.</p>
+            <div class="hero-actions">
+                <a href="#cli" class="btn-primary">QUICKSTART GUIDE</a>
+                <a href="https://github.com/bhubbard/vite-plus-commitlint" class="btn-secondary" target="_blank" rel="noopener">VIEW SOURCE ON GITHUB ↗</a>
+            </div>
+        </section>
+
+        <section id="architecture">
+            <h2 class="section-title">ENGINEERING OVERVIEW</h2>
+            <div class="card" style="margin-bottom: 2rem;">
+                <p style="color: var(--steel); font-size: 1rem; line-height: 1.7;">Ultra-fast Conventional Commits validator and Git hook integration built in Rust for the Vite+ unified frontend toolchain. Enforces semantic commit messages across local workflows and CI pipelines in microseconds.</p>
+            </div>
+
+            <h2 class="section-title" id="cli">COMMAND LINE & WORKFLOW EXAMPLES</h2>
+            <div class="grid-2">
+                <div class="card">
+    <div class="card-header">Validate Commit Message</div>
+    <div class="card-desc">Validates the active git commit message against Conventional Commits specifications.</div>
+    <div class="code-block">
+        <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.innerText='COPIED'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+        <pre><code>vite-plus-commitlint --edit .git/COMMIT_EDITMSG</code></pre>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">Check Commit Range in CI</div>
+    <div class="card-desc">Audits entire git history range across pull requests to guarantee compliant history.</div>
+    <div class="code-block">
+        <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.innerText='COPIED'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+        <pre><code>vite-plus-commitlint --from origin/main~1 --to origin/main</code></pre>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">Vite+ CLI Plugin Task</div>
+    <div class="card-desc">Executes commitlint natively via the Vite+ unified task runner.</div>
+    <div class="code-block">
+        <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.innerText='COPIED'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+        <pre><code>vp commitlint</code></pre>
+    </div>
+</div>
+
+            </div>
+
+            <h2 class="section-title" id="rules">RULE & POLICY SPECIFICATIONS</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rule ID</th>
+                            <th>Category</th>
+                            <th>Severity</th>
+                            <th>Rule Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+    <td style="font-family: var(--font-mono); color: var(--cobalt); font-weight: 700;">type-enum</td>
+    <td style="font-family: var(--font-mono); color: var(--steel);">Format</td>
+    <td><span class="badge-err">ERROR</span></td>
+    <td style="color: var(--steel);">Commit type must be one of: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert.</td>
+</tr>
+<tr>
+    <td style="font-family: var(--font-mono); color: var(--cobalt); font-weight: 700;">subject-empty</td>
+    <td style="font-family: var(--font-mono); color: var(--steel);">Structure</td>
+    <td><span class="badge-err">ERROR</span></td>
+    <td style="color: var(--steel);">Commit subject line cannot be empty.</td>
+</tr>
+<tr>
+    <td style="font-family: var(--font-mono); color: var(--cobalt); font-weight: 700;">header-max-length</td>
+    <td style="font-family: var(--font-mono); color: var(--steel);">Length</td>
+    <td><span class="badge-warn">WARN</span></td>
+    <td style="color: var(--steel);">Commit header must not exceed 100 characters.</td>
+</tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-text">
+                <strong>vite-plus-commitlint</strong> &bull; Open Source under the <a href="https://github.com/bhubbard/vite-plus-commitlint/blob/main/LICENSE" style="color: var(--titanium); text-decoration: none;">MIT License</a>.
+                <span style="display: block; color: var(--steel); font-size: 0.75rem; margin-top: 0.25rem;">Engineered by <a href="https://brandonhubbard.com" style="color: var(--steel); text-decoration: underline;" target="_blank" rel="noopener">Brandon Hubbard</a></span>
+            </div>
+            <ul class="footer-links">
+                <li><a href="https://github.com/bhubbard/vite-plus-commitlint" class="footer-link">GitHub Repository</a></li>
+                <li><a href="https://github.com/bhubbard/vite-plus-commitlint/issues" class="footer-link">Issue Tracker</a></li>
+                <li><a href="https://brandonhubbard.com" class="footer-link">Brandon Hubbard</a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>
