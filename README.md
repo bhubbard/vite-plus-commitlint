@@ -5,6 +5,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Vite+](https://img.shields.io/badge/Toolchain-Vite%2B-7474FB)](https://viteplus.dev)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D22.12.0-brightgreen)](https://nodejs.org)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-code.brandonhubbard.com-brightgreen?logo=github)](https://code.brandonhubbard.com/vite-plus-commitlint/)
+
+> 🎮 **Live Interactive Visualizer & Demo:** [vite-plus-commitlint on code.brandonhubbard.com](https://code.brandonhubbard.com/vite-plus-commitlint/)
 
 ---
 
