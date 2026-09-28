@@ -41,7 +41,7 @@
     "tsdown": "^0.15.12",
     "typescript": "^5.9.3",
     "vite": "^6.4.3",
-    "vite-plus": "^0.1.24",
+    "vite-plus": "^1.0.0",
     "vitest": "^3.2.7",
     "vite-plus-commitlint": "^1.1.3"
   },
